@@ -11,6 +11,7 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ChatController chatController = Get.find<ChatController>();
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final TextEditingController messageController = TextEditingController();
 
     Widget buildChatDetail(ChatMessage chat) {
       return Column(
@@ -62,27 +63,69 @@ class ChatPage extends StatelessWidget {
             child: Container(
               color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.all(16),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Last message:',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
+              child: Obx(() {
+                final messages = chatController.messages;
+                if (messages.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No messages yet',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Start the conversation!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      chat.message,
-                      style: const TextStyle(
-                        fontSize: 16,
+                  );
+                }
+
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final isCurrentUser = message.senderName == 'You';
+
+                    return Align(
+                      alignment: isCurrentUser
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isCurrentUser
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          message.message,
+                          style: TextStyle(
+                            color: isCurrentUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    );
+                  },
+                );
+              }),
             ),
           ),
           // Message input
@@ -101,6 +144,7 @@ class ChatPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: messageController,
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
                         border: OutlineInputBorder(
@@ -114,12 +158,22 @@ class ChatPage extends StatelessWidget {
                           vertical: 10,
                         ),
                       ),
+                      onSubmitted: (value) {
+                        if (value.trim().isNotEmpty) {
+                          chatController.sendMessage(chat.id, value.trim());
+                          messageController.clear();
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: () {
-                      // Implement send message
+                      if (messageController.text.trim().isNotEmpty) {
+                        chatController.sendMessage(
+                            chat.id, messageController.text.trim());
+                        messageController.clear();
+                      }
                     },
                     icon: const Icon(Icons.send),
                     color: Theme.of(context).colorScheme.primary,

@@ -4,26 +4,26 @@ class UserModel {
   final String id;
   final String name;
   final String email;
-  final DateTime? lastSeen;
   final String? photoUrl;
+  final DateTime? lastSeen;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
-    this.lastSeen,
     this.photoUrl,
+    this.lastSeen,
   });
 
-  factory UserModel.fromMap(String id, Map<String, dynamic> map) {
+  factory UserModel.fromMap(String uid, Map<String, dynamic> map) {
     return UserModel(
-      id: id,
+      id: uid,
       name: map['name'] ?? '',
       email: map['email'] ?? '',
-      lastSeen: map['lastSeen'] != null
-          ? (map['lastSeen'] as Timestamp).toDate()
-          : null,
       photoUrl: map['photoUrl'],
+      lastSeen: map['lastSeen'] != null
+          ? (map['lastSeen'] as dynamic).toDate()
+          : null,
     );
   }
 
@@ -31,8 +31,8 @@ class UserModel {
     return {
       'name': name,
       'email': email,
-      'lastSeen': lastSeen,
       'photoUrl': photoUrl,
+      'lastSeen': lastSeen,
     };
   }
 }

@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -16,6 +16,11 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
     user.bindStream(_auth.authStateChanges());
+  }
+
+  String _getRandomAvatar() {
+    final seed = DateTime.now().millisecondsSinceEpoch.toString();
+    return 'https://api.dicebear.com/7.x/avataaars/svg?seed=$seed';
   }
 
   Future<bool> login(String email, String password) async {
@@ -78,16 +83,21 @@ class AuthController extends GetxController {
       print(
           'User created successfully: ${userCredential.user?.uid}'); // Debug print
 
+      // Generate random avatar
+      final photoUrl = _getRandomAvatar();
+
       // Create user document in Firestore
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'name': name,
         'email': email,
+        'photoUrl': photoUrl,
         'createdAt': FieldValue.serverTimestamp(),
         'lastSeen': FieldValue.serverTimestamp(),
       });
 
       // Update user profile
       await userCredential.user!.updateDisplayName(name);
+      await userCredential.user!.updatePhotoURL(photoUrl);
 
       print(
           'User profile updated and Firestore document created'); // Debug print
