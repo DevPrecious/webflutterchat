@@ -4,7 +4,7 @@ class ChatModel {
   final String id;
   final List<String> participants;
   final String lastMessage;
-  final DateTime lastMessageTime;
+  final DateTime? lastMessageTime;
   final String lastSenderId;
   final bool isRead;
 
@@ -22,7 +22,9 @@ class ChatModel {
       id: id,
       participants: List<String>.from(map['participants'] ?? []),
       lastMessage: map['lastMessage'] ?? '',
-      lastMessageTime: (map['lastMessageTime'] as Timestamp).toDate(),
+      lastMessageTime: map['lastMessageTime'] != null
+          ? (map['lastMessageTime'] as Timestamp).toDate()
+          : null,
       lastSenderId: map['lastSenderId'] ?? '',
       isRead: map['isRead'] ?? true,
     );
@@ -32,7 +34,7 @@ class ChatModel {
     return {
       'participants': participants,
       'lastMessage': lastMessage,
-      'lastMessageTime': Timestamp.fromDate(lastMessageTime),
+      'lastMessageTime': lastMessageTime,
       'lastSenderId': lastSenderId,
       'isRead': isRead,
     };

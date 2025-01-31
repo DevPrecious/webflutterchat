@@ -23,12 +23,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLogin() async {
-    final success = await _authController.login(
-      _emailController.text,
-      _passwordController.text,
-    );
-    if (success) {
-      Get.offAllNamed('/chat'); // Navigate to chat page
+    try {
+      await _authController.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+      Get.offAllNamed('/chat'); // Navigate to chat page if successful
+    } catch (e) {
+      // Error is already handled in the controller
     }
   }
 

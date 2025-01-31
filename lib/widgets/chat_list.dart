@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/auth_controller.dart';
-import '../models/user_model.dart';
+import '../models/user_model.dart' as model;
 import '../models/chat_model.dart';
-import 'package:intl/intl.dart';
 
 class ChatList extends StatelessWidget {
   ChatList({Key? key}) : super(key: key);
@@ -16,156 +16,162 @@ class ChatList extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
 
-    return Container(
-      width: isMobile ? MediaQuery.of(context).size.width : null,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: !isMobile
-            ? Border(
-                right: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                ),
-              )
-            : null,
-      ),
-      child: Column(
-        children: [
-          // Header with logout
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  Text(
-                    'Messages',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+    return Scaffold(
+      body: Container(
+        width: isMobile ? MediaQuery.of(context).size.width : null,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: !isMobile
+              ? Border(
+                  right: BorderSide(
+                    color: Theme.of(context).dividerColor,
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () => _showLogoutDialog(context),
-                    tooltip: 'Logout',
+                )
+              : null,
+        ),
+        child: Column(
+          children: [
+            // Header with logout
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-            ),
-          ),
-
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              onChanged: chatController.updateSearchQuery,
-              decoration: InputDecoration(
-                hintText: 'Search users...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: Obx(() {
-                  return chatController.searchQuery.value.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: chatController.clearSearch,
-                        )
-                      : const SizedBox.shrink();
-                }),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none,
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Text(
+                      'Messages',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.logout),
+                      onPressed: () => _showLogoutDialog(context),
+                      tooltip: 'Logout',
+                    ),
+                  ],
                 ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant,
               ),
             ),
-          ),
 
-          // Search results or chat list
-          Expanded(
-            child: Obx(() {
-              if (chatController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                onChanged: chatController.updateSearchQuery,
+                decoration: InputDecoration(
+                  hintText: 'Search users...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: Obx(() {
+                    return chatController.searchQuery.value.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: chatController.clearSearch,
+                          )
+                        : const SizedBox.shrink();
+                  }),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                ),
+              ),
+            ),
 
-              // Show search results if searching
-              if (chatController.searchQuery.value.isNotEmpty) {
-                if (chatController.isSearching.value) {
+            // Search results or chat list
+            Expanded(
+              child: Obx(() {
+                if (chatController.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final searchResults = chatController.searchResults;
-                if (searchResults.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No users found',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                // Show search results if searching
+                if (chatController.searchQuery.value.isNotEmpty) {
+                  if (chatController.isSearching.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final searchResults = chatController.searchResults;
+                  if (searchResults.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No users found',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: searchResults.length,
+                    itemBuilder: (context, index) {
+                      final user = searchResults[index];
+                      return _buildUserListItem(context, user);
+                    },
+                  );
+                }
+
+                // Show chat history
+                final users = chatController.chatUsers;
+                print('Chat list showing ${users.length} users'); // Debug print
+
+                if (users.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No chats yet',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Search for users to start chatting',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }
 
                 return ListView.builder(
-                  itemCount: searchResults.length,
+                  itemCount: users.length,
                   itemBuilder: (context, index) {
-                    final user = searchResults[index];
+                    final user = users[index];
                     return _buildUserListItem(context, user);
                   },
                 );
-              }
-
-              // Show chat history
-              final chats = chatController.chats;
-              if (chats.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'No chats yet',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Search for users to start chatting',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                itemCount: chats.length,
-                itemBuilder: (context, index) {
-                  final chat = chats[index];
-                  return _buildChatListItem(context, chat);
-                },
-              );
-            }),
-          ),
-        ],
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -195,9 +201,9 @@ class ChatList extends StatelessWidget {
     );
   }
 
-  Widget _buildUserListItem(BuildContext context, UserModel user) {
+  Widget _buildUserListItem(BuildContext context, model.UserModel user) {
     return InkWell(
-      onTap: () => chatController.createOrOpenChat(user),
+      onTap: () => chatController.startChat(user),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -215,9 +221,8 @@ class ChatList extends StatelessWidget {
             // Avatar
             CircleAvatar(
               radius: 24,
-              backgroundImage: user.photoUrl != null
-                  ? NetworkImage(user.photoUrl!)
-                  : null,
+              backgroundImage:
+                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
               child: user.photoUrl == null
                   ? Text(
                       user.name[0].toUpperCase(),
@@ -264,7 +269,8 @@ class ChatList extends StatelessWidget {
           vertical: 12,
         ),
         decoration: BoxDecoration(
-          color: !chat.isRead && chat.lastSenderId != authController.user.value?.uid
+          color: !chat.isRead &&
+                  chat.lastSenderId != authController.user.value?.id
               ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
               : null,
           border: Border(
@@ -297,7 +303,8 @@ class ChatList extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatTimestamp(chat.lastMessageTime),
+                        _formatTimestamp(chat.lastMessageTime ??
+                            DateTime.fromMillisecondsSinceEpoch(0)),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 12,
@@ -307,7 +314,9 @@ class ChatList extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    chat.lastMessage.isEmpty ? 'No messages yet' : chat.lastMessage,
+                    chat.lastMessage.isEmpty
+                        ? 'No messages yet'
+                        : chat.lastMessage,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
