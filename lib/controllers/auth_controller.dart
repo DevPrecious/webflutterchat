@@ -149,8 +149,14 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       error.value = '';
-      await _auth.signOut();
+      
+      // Clear user data first
       user.value = null;
+      
+      // Sign out from Firebase
+      await _auth.signOut();
+      
+      print('User signed out successfully'); // Debug print
     } catch (e) {
       print('Logout error: $e'); // Debug print
       error.value = 'Error during logout: $e';

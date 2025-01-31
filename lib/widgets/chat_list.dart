@@ -189,9 +189,10 @@ class ChatList extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                authController.logout();
+                await authController.logout();
+                Get.offAllNamed('/login');
               },
               child: const Text('Logout'),
             ),
